@@ -27,16 +27,19 @@ class Portfolio():
             diff = i.Price - i.prevClose
             diff = round(diff, 2)
             diffPercent = round((diff/i.Price)*100,2)
-            DataToAdd.append([i.ticker, diffPercent])
-        self.diffDf = pd.DataFrame(DataToAdd, columns=["Ticker", "Different %"])
+            DataToAdd.append([i.ticker, diffPercent, i.Price])
+        self.diffDf = pd.DataFrame(DataToAdd, columns=["Ticker", "Different %", "Price"])
 
     def HTMLData(self) -> str:
         html = """
+        <hr>
+        <h2>Portfolio Data</h2>
         <table border="1" style="border-collapse: collapse;">
             <thead>
                 <tr>
                     <th>Ticker</th>
                     <th>Growth</th>
+                    <th>Price</th>
                     <th>Trend</th>
                 </tr>
             </thead>
@@ -51,20 +54,19 @@ class Portfolio():
             <tr>
                 <td>{row['Ticker']}</td>
                 <td>{row['Different %']}</td>
+                <td>{row['Price']}</td>
                 <td style="color: {color};">{arrow}</td>
             </tr>
             """
     
-        html += """
+        html += f"""
             </tbody>
         </table>
+        <br>
+        <p>Your current Portfolio Value: {self.PortfolioValue} $. </p>
+        <hr>
         """
         return html
-
-
-        returnString = f"A Portfólió részvény értéke: {self.PortfolioValue}"
-
-        return returnString
 
 
 
