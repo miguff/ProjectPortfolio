@@ -4,8 +4,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
 import osenv
+import sys
+
 
 def main():
+
     
     StocksData = {
         "AAPL":3,
