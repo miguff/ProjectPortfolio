@@ -1,15 +1,46 @@
 from .Class_StockData import StockData as SD
 import pandas as pd
+import sqlite3
+from datetime import datetime
 
 
 
 class Portfolio():
     
-    def __init__(self, PortfolioData: dict) -> None:
+    def __init__(self, PortfolioData: dict, Database: str) -> None:
         self.PortfolioData = PortfolioData
         self.PortfolioList: list = []
         self.PortfolioValue: float = 0
         self.diffDf: pd.DataFrame = None
+        self.Database = Database
+
+    def FillSQL(self, table: str):
+        sqlString = f"INSERT INTO {table} ([LogDate], "
+        match table:
+            case "Dividend":
+                None
+            case "PortfolioValue":
+                for i in self.PortfolioList:
+                    sqlString = sqlString + f"[{i.ticker}],"
+                sqlString = sqlString + f"[SUM])"
+                sqlString = sqlString + f" VALUES ('{datetime.now().replace(day=1).strftime('%Y-%m-%d')}',"
+                for i in self.PortfolioList:
+                    sqlString = sqlString + f"{round(i.Darab*i.Price,2)},"
+                if self.PortfolioValue != 0:
+                    sqlString = sqlString + f"{round(self.PortfolioValue,2)})"
+                else:
+                    for i in self.PortfolioList:
+                        self.PortfolioValue = self.PortfolioValue + (i.Darab*i.Price)
+                    sqlString = sqlString + f"{round(self.PortfolioValue,2)})"
+        print(sqlString)
+        self.SQLUpload(sqlString)
+
+    def SQLUpload(self, sqlString:str):
+        conn = sqlite3.connect(self.Database)
+        cursorObj = conn.cursor()
+        cursorObj.execute(sqlString)
+        conn.commit()
+        conn.close()
 
     def SetupPortfolio(self):
         for i in self.PortfolioData:
@@ -17,7 +48,7 @@ class Portfolio():
             newStock.SetupStock()
             self.PortfolioList.append(newStock)
 
-    def PortfoliValuefunc(self):
+    def PortfoliValuefunc(self):  
         for i in self.PortfolioList:
             self.PortfolioValue = self.PortfolioValue + (i.Darab*i.Price)
 

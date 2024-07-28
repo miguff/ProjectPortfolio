@@ -30,7 +30,7 @@ class StockData():
 
     def SetupStock(self):
         self.GrowthData()
-        self.Rations()
+        #self.Rations()
         self.Values()
         self.Prices()
         self.getStatements()
