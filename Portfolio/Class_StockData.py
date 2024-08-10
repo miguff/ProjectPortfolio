@@ -1,4 +1,5 @@
 import yfinance as yf
+import warnings
 
 
 class StockData():
@@ -38,30 +39,44 @@ class StockData():
     def GrowthData(self):
         try:
             self.RevenueGrowth =  self.Stock.info['revenueGrowth']
+        except:
+            self.RevenueGrowth = 0
+            warnings.warn(f'{self.ticker}: Ticker not recognized')
+        try:
             self.EarningsGrowth = self.Stock.info['earningsGrowth']
         except KeyError:
-            raise ValueError('Ticker not recognized')
+            self.EarningsGrowth
+            warnings.warn(f'{self.ticker}: Ticker not recognized')
 
     def Rations(self):
         try:
             self.QuickRation =  self.Stock.info['quickRatio']
+        except KeyError:
+            warnings.warn(f'{self.ticker}: Ticker not recognized')
+        try:
             self.PriceToBook = self.Stock.info['priceToBook']
         except KeyError:
-            raise ValueError('Ticker not recognized')
+            warnings.warn(f'{self.ticker}: Ticker not recognized')
     
     def Values(self):
         try:
             self.EnterpriseValue =  self.Stock.info['enterpriseValue']
+        except KeyError:
+            warnings.warn(f'{self.ticker}: Ticker not recognized')
+        try:
             self.BookValue = self.Stock.info['bookValue']
         except KeyError:
-            raise ValueError('Ticker not recognized') 
+            warnings.warn(f'{self.ticker}: Ticker not recognized') 
         
     def Prices(self):
         try:
             self.Price = round(self.Stock.info['currentPrice'],2)
+        except KeyError:
+            warnings.warn(f'{self.ticker}: Ticker not recognized')
+        try:
             self.prevClose = round(self.Stock.info['previousClose'],2)
         except KeyError:
-            raise ValueError('Ticker not recognized')
+            warnings.warn(f'{self.ticker}: Ticker not recognized')
 
     def getStatements(self):
         try:
@@ -69,4 +84,5 @@ class StockData():
             self.IncomeStatement = self.Stock.income_stmt
             self.Cashflow = self.Stock.cashflow
         except KeyError:
-            raise ValueError("Ticker not recognized")
+            warnings.warn("Ticker not recognized")
+        

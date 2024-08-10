@@ -31,7 +31,8 @@ class Portfolio():
                 else:
                     for i in self.PortfolioList:
                         self.PortfolioValue = self.PortfolioValue + (i.Darab*i.Price)
-                    sqlString = sqlString + f"{round(self.PortfolioValue,2)})"
+                    self.PortfolioValue = round(self.PortfolioValue,2)
+                    sqlString = sqlString + f"{self.PortfolioValue})"
         print(sqlString)
         self.SQLUpload(sqlString)
 
@@ -48,9 +49,12 @@ class Portfolio():
             newStock.SetupStock()
             self.PortfolioList.append(newStock)
 
-    def PortfoliValuefunc(self):  
-        for i in self.PortfolioList:
-            self.PortfolioValue = self.PortfolioValue + (i.Darab*i.Price)
+    def PortfoliValuefunc(self):
+        if self.PortfolioValue == 0: 
+            for i in self.PortfolioList:
+                self.PortfolioValue = self.PortfolioValue + (i.Darab*i.Price)
+        self.PortfolioValue = round(self.PortfolioValue,2)
+        
 
     def GetGrowthValue(self):
         DataToAdd = []
