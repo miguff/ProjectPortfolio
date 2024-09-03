@@ -20,7 +20,9 @@ def main():
         "FRT": 8,
         "NNN": 23,
         "PG": 3,
-        "O": 15
+        "O": 15,
+        "VUSA.AS": 10,
+        "IS0R.DE": 8
     }
 
 
@@ -33,7 +35,7 @@ def main():
     newPortfolio.GetGrowthValue()
     htmlData = newPortfolio.HTMLData()
     
-    print(newPortfolio.PortfolioValue)
+    
     
    
     SendEmail("Stock Growth", htmlData)

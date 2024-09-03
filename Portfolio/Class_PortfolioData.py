@@ -2,6 +2,7 @@ from .Class_StockData import StockData as SD
 import pandas as pd
 import sqlite3
 from datetime import datetime
+import warnings
 
 
 
@@ -34,7 +35,10 @@ class Portfolio():
                     self.PortfolioValue = round(self.PortfolioValue,2)
                     sqlString = sqlString + f"{self.PortfolioValue})"
         print(sqlString)
-        self.SQLUpload(sqlString)
+        try:
+            self.SQLUpload(sqlString)
+        except Exception as e:
+            warnings.warn(f"I could not upload, There was an error, please check: {e}")
 
     def SQLUpload(self, sqlString:str):
         conn = sqlite3.connect(self.Database)

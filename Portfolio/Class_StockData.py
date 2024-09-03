@@ -72,6 +72,7 @@ class StockData():
         try:
             self.Price = round(self.Stock.info['currentPrice'],2)
         except KeyError:
+            self.Price = round(self.Stock.info['previousClose'],2)
             warnings.warn(f'{self.ticker}: Ticker not recognized')
         try:
             self.prevClose = round(self.Stock.info['previousClose'],2)

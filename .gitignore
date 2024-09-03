@@ -1,0 +1,5 @@
+Images/
+__pycache__
+osenv.py
+Portfolio.db
+test.py
