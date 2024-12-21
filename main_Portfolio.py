@@ -43,14 +43,8 @@ def main():
 
     newPortfolio = PD.Portfolio(StocksData, "Portfolio.db")
     newPortfolio.SetupPortfolio()
-    
     newPortfolio.FillPortfolioValue(typeofdata, date, dataDf)
-    # newPortfolio.PortfoliValuefunc()
-    # newPortfolio.GetGrowthValue()
-    # htmlData = newPortfolio.HTMLData()
 
-   
-    # SendEmail("Stock Growth", htmlData)
 
 
 def CreatePortfolioDB(filename: str, StockList: dict):

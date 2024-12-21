@@ -16,9 +16,9 @@ def main():
 
     SqlCursor, SQLConn = ConnectToSQL("Portfolio.db")
 
-    StocksDf = pd.read_sql("SELECT * FROM PortfolioValue",SQLConn)
+    StocksDf = pd.read_sql("SELECT * FROM PortfolioValue Order by LogDate asc",SQLConn)
     StocksDf.set_index("LogDate", inplace=True)
-
+    StocksDf = StocksDf.loc[:, ~StocksDf.iloc[-1].isna()]
 
     #It will be used to Analize certain Stocks
     StockTickers = StocksDf.columns.to_list()
@@ -27,18 +27,16 @@ def main():
     SendEmail("Portfolió Value")
 
      
-
-    # newStock = CS.StockData("XOM")
-    # newStock.SetupStock()
-    # M.MultipleAnal(newStock)
-
 def MakePortfolioPlots(Df: pd.DataFrame, ListOfData: list):
     
+
+
     for i in ListOfData:
         ax = sns.barplot(Df, x=Df.index, y=i)
         ax.bar_label(ax.containers[0], fontsize=10)
         plt.title(f"Value of {i} ($) ")
         fig = ax.get_figure()
+        #plt.show()
         fig.savefig(f"Images/{i}.jpg")
         plt.close()
     
@@ -49,6 +47,7 @@ def MakePortfolioPlots(Df: pd.DataFrame, ListOfData: list):
     ListOfData.remove("SUM")
     plt.pie(PriceValues, labels=ListOfData,colors=palette_color, autopct='%.0f%%')
     plt.title("Pie Chart of Portfolio Percent")
+    plt.show()
     plt.savefig(f"Images/PieChart.jpg")
     plt.close()
 
