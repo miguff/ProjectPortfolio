@@ -1,4 +1,8 @@
 from Portfolio import Class_PortfolioData as PD
+from DownloadData import DataGather as Data
+from DownloadData import isin_to_ticker
+from DownloadData import EmailDownload 
+from datetime import datetime, timedelta
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -8,37 +12,45 @@ import osenv
 import sys
 
 
+
 def main():
+    date = datetime.now().replace(day=1).strftime('%Y-%m-%d')
+    current_date = datetime.now()
+    previous_month_date = current_date.replace(day=1) - timedelta(days=1)
+    previous_Year = previous_month_date.strftime("%Y")
 
+    typeofdata = "Mid-month"
+
+
+    EmailDownloader = EmailDownload("subject:\"Havi értesítő\"", "Portfolio")
+    DownloadedPath = EmailDownloader.fileDownloader()
+    print(DownloadedPath)
+
+    if typeofdata == "EoM":
+        gathering = Data(DownloadedPath, f"Done - {previous_Year} - Havi_ertesito.pdf")
+        gathering.inputfile()
+    elif typeofdata == "Mid-month":
+        gathering = Data(DownloadedPath, f"Done - {previous_Year} - Havi_ertesito.pdf", f"Done - {previous_Year} - Havi_ertesito.pdf")
     
-    StocksData = {
-        "AAPL":3,
-        "BRK-B" :3,
-        "BLK": 2,
-        "KO":24,
-        "XOM": 10,
-        "FRT": 8,
-        "NNN": 23,
-        "PG": 3,
-        "O": 15,
-        "VUSA.AS": 10,
-        "IS0R.DE": 8
-    }
-
+    gathering.DePassword()
+    dataDf = gathering.MonthlyExtract()
+    dataDf['Ticker'] = dataDf["ISIN"].apply(isin_to_ticker)
+    dataDf.reset_index(drop=True, inplace=True)
+    StocksData = dict(zip(dataDf["Ticker"], dataDf["Piece"]))
+    print(dataDf)
 
     CreatePortfolioDB("Portfolio.db", StocksData)
 
     newPortfolio = PD.Portfolio(StocksData, "Portfolio.db")
     newPortfolio.SetupPortfolio()
-    newPortfolio.FillSQL("PortfolioValue")
-    newPortfolio.PortfoliValuefunc()
-    newPortfolio.GetGrowthValue()
-    htmlData = newPortfolio.HTMLData()
     
-    
-    
+    newPortfolio.FillPortfolioValue(typeofdata, date, dataDf)
+    # newPortfolio.PortfoliValuefunc()
+    # newPortfolio.GetGrowthValue()
+    # htmlData = newPortfolio.HTMLData()
+
    
-    SendEmail("Stock Growth", htmlData)
+    # SendEmail("Stock Growth", htmlData)
 
 
 def CreatePortfolioDB(filename: str, StockList: dict):
@@ -46,13 +58,12 @@ def CreatePortfolioDB(filename: str, StockList: dict):
     conn = None
     try:
         conn = sqlite3.connect(filename)
-        tableQueryDividend = CreateTable(StockList, "Dividend")
         tableQueryPortfolio = CreateTable(StockList, "PortfolioValue")
         cursorObj = conn.cursor()
-        try:
-            cursorObj.execute(tableQueryDividend)
-        except sqlite3.Error as e:
-            print(e)
+        # try:
+        #     cursorObj.execute(tableQueryDividend)
+        # except sqlite3.Error as e:
+        #     print(e)
         try:
             cursorObj.execute(tableQueryPortfolio)
         except sqlite3.Error as e:
