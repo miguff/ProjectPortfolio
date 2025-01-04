@@ -6,6 +6,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from datetime import datetime, timedelta
+import sys
 import osenv
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
@@ -77,6 +78,7 @@ class EmailDownload:
                                 print(f"Downloaded: {part['filename']}")
                             else:
                                 print("Already Downloaded (Portfolio)")
+                                sys.exit()
                                 break
                         else:
                             filepath = os.path.join(self.currentpath, f"{subject}.pdf")

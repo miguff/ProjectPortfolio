@@ -11,33 +11,75 @@ from email.mime.image import MIMEImage
 import osenv
 import smtplib, glob
 import base64
+import sys
 
 def main():
 
-    SqlCursor, SQLConn = ConnectToSQL("Portfolio.db")
+    dividendchoser = 1
+    
+    match dividendchoser:
+        case 0:
+            Table = 'PortfolioValue'
+            Subject = "Portfolio Value"
+            func = Portfoliofunc
+        case 1:
+            Table = "Dividend"
+            Subject = "Dividend Value"
+            func = dividendfunc
+        case _:
+            print("Wrong input number")
+            sys.exit()
+    
 
-    StocksDf = pd.read_sql("SELECT * FROM PortfolioValue Order by LogDate asc",SQLConn)
+    SqlCursor, SQLConn = ConnectToSQL("Portfolio.db")
+    StocksDf = pd.read_sql(f"SELECT * FROM {Table} Order by LogDate asc",SQLConn)
     StocksDf.set_index("LogDate", inplace=True)
     StocksDf = StocksDf.loc[:, ~StocksDf.iloc[-1].isna()]
 
-    #It will be used to Analize certain Stocks
-    StockTickers = StocksDf.columns.to_list()
-
-    MakePortfolioPlots(StocksDf, StockTickers)
-    SendEmail("Portfolió Value")
-
+    func(StocksDf)
+    #SendEmail(Subject)
      
-def MakePortfolioPlots(Df: pd.DataFrame, ListOfData: list):
+def dividendfunc(Stocks: pd.DataFrame):
+    MonthlydivDF = Stocks[["All Dividend", "Tax", "Ticker"]]
+    MonthlydivDF.index = pd.to_datetime(MonthlydivDF.index)
+    MonthlySummary = MonthlydivDF.resample('M').sum()
+    print(MonthlySummary)
+
+
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.plot(MonthlySummary.index, MonthlySummary['All Dividend'], label="All Dividend", marker='o')
+    plt.plot(MonthlySummary.index, MonthlySummary['Tax'], label="Tax", marker='o')
+
+    # Add labels, legend, and title
+    plt.title("Monthly Totals of All Dividend and Tax", fontsize=16)
+    plt.xlabel("Log Date", fontsize=12)
+    plt.ylabel("Amount", fontsize=12)
+    plt.xticks(rotation=45, ha='right', fontsize=10)
+    plt.legend(title="Category", fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    # Show plot
+    plt.tight_layout()
+    plt.show()
     
 
 
+def Portfoliofunc(StocksDf :pd.DataFrame):
+    StockTickers = StocksDf.columns.to_list()
+    MakePortfolioPlots(StocksDf, StockTickers)
+
+
+
+def MakePortfolioPlots(Df: pd.DataFrame, ListOfData: list):
+    
     for i in ListOfData:
         ax = sns.barplot(Df, x=Df.index, y=i)
         ax.bar_label(ax.containers[0], fontsize=10)
         plt.title(f"Value of {i} ($) ")
         fig = ax.get_figure()
-        #plt.show()
-        fig.savefig(f"Images/{i}.jpg")
+        plt.show()
+        fig.savefig(f"Images/{i.replace('.', '_')}.jpg")
         plt.close()
     
 
@@ -47,7 +89,7 @@ def MakePortfolioPlots(Df: pd.DataFrame, ListOfData: list):
     ListOfData.remove("SUM")
     plt.pie(PriceValues, labels=ListOfData,colors=palette_color, autopct='%.0f%%')
     plt.title("Pie Chart of Portfolio Percent")
-    plt.show()
+    #plt.show()
     plt.savefig(f"Images/PieChart.jpg")
     plt.close()
 

@@ -17,9 +17,9 @@ def main():
     date = datetime.now().replace(day=1).strftime('%Y-%m-%d')
     current_date = datetime.now()
     previous_month_date = current_date.replace(day=1) - timedelta(days=1)
-    previous_Year = previous_month_date.strftime("%Y")
+    Year = previous_month_date.strftime("%Y")
 
-    typeofdata = "Mid-month"
+    typeofdata = "EoM"
 
 
     EmailDownloader = EmailDownload("subject:\"Havi értesítő\"", "Portfolio")
@@ -27,10 +27,10 @@ def main():
     print(DownloadedPath)
 
     if typeofdata == "EoM":
-        gathering = Data(DownloadedPath, f"Done - {previous_Year} - Havi_ertesito.pdf")
+        gathering = Data(DownloadedPath, f"Done - {Year} - Havi_ertesito.pdf")
         gathering.inputfile()
     elif typeofdata == "Mid-month":
-        gathering = Data(DownloadedPath, f"Done - {previous_Year} - Havi_ertesito.pdf", f"Done - {previous_Year} - Havi_ertesito.pdf")
+        gathering = Data(DownloadedPath, f"Done - {Year} - Havi_ertesito.pdf", f"Done - {Year} - Havi_ertesito.pdf")
     
     gathering.DePassword()
     dataDf = gathering.MonthlyExtract()

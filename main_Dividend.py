@@ -35,7 +35,7 @@ def main():
         for data in StocksData:
             newPortfolio = PD.Portfolio(data, "Portfolio.db")
             newPortfolio.FillDividendValue()
-        os.remove(os.path.join(DownloadedPath, element))
+        
 
 
 
