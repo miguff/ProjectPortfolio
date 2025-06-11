@@ -6,27 +6,32 @@ import sqlite3
 import os
 import osenv
 import sys
+import pandas as pd
+import numpy as np
+from pandas_datareader import data as pdr
+import datetime as dt
+import yfinance as yf
+import matplotlib.pyplot as plt 
+from email.mime.image import MIMEImage
+
 
 
 def main():
 
     
     StocksData = {
-        "AAPL":3,
         "BRK-B" :3,
         "BLK": 2,
-        "KO":24,
+        "KO":29,
         "XOM": 10,
         "FRT": 8,
-        "NNN": 23,
-        "PG": 3,
-        "O": 15,
-        "VUSA.AS": 10,
-        "IS0R.DE": 8
+        "VUSA.AS": 46,
+        "IS0R.DE": 20,
+        "ZPRG.DE": 42
     }
 
 
-    CreatePortfolioDB("Portfolio.db", StocksData)
+    # CreatePortfolioDB("Portfolio.db", StocksData)
 
     newPortfolio = PD.Portfolio(StocksData, "Portfolio.db")
     newPortfolio.SetupPortfolio()
@@ -35,10 +40,59 @@ def main():
     newPortfolio.GetGrowthValue()
     htmlData = newPortfolio.HTMLData()
     
+
+    stocklist = list(StocksData.keys())
+    endDate = dt.datetime.now()
+    startDate = endDate - dt.timedelta(days=300)
+
+    meanReturns, covMatrix = get_data(stocklist, startDate, endDate)
+    print(meanReturns)
+    print(covMatrix)
+
+
+    number_of_stocks = sum(StocksData.values())
+    values = np.array(list(StocksData.values()))
+    weights = values/number_of_stocks
+
+
+    #Monte Carlo
+    #Nember of Simulation
+    mc_sims = 100
+    T = 100 #timeFrame in days
+
+    meanM = np.full(shape=(T, len(weights)), fill_value=meanReturns)
+    meanM = meanM.T
+
+    Portfolio_sims = np.full(shape=(T, mc_sims), fill_value=0.0)
+    initialPortfolio = 15000 #ezt majd dinamikussá kell tenni, hogy azt az összeg legyen benne, ami ténylegesen a portfolio értéke.
+
+    for m in range(0, mc_sims):
+        Z = np.random.normal(size=(T, len(weights)))
+        L = np.linalg.cholesky(covMatrix)
+        dailyReturns = meanM + np.inner(L, Z)
+        Portfolio_sims[:,m] = np.cumprod(np.inner(weights, dailyReturns.T)+1)*initialPortfolio
+
+
+    plt.plot(Portfolio_sims)
+    plt.ylabel("Portfolio Value ($)")
+    plt.xlabel("Days")
+    plt.title("MC Simulation of a Stock Portfolio")
+    plt.savefig(f"Images/MCSim.jpg")
     
-    
+
    
     SendEmail("Stock Growth", htmlData)
+
+def get_data(stocks, start, end):
+    stock_data = yf.download(stocks, start=start, end=end)['Close']
+    if isinstance(stock_data, pd.Series):
+        stock_data = stock_data.to_frame()
+
+    returns = stock_data.pct_change()
+    meanReturns = returns.mean()
+    covMatrix = returns.cov()
+
+    return meanReturns, covMatrix
 
 
 def CreatePortfolioDB(filename: str, StockList: dict):
@@ -87,6 +141,14 @@ def SendEmail(Subject: str, htmlData: str):
     msg['From'] = from_email
     msg['To'] = to_email
 
+
+    path = "Images/"
+    pngfilepath = os.path.join(path, "MCSim.jpg")
+    fp = open(pngfilepath, 'rb')
+    img = MIMEImage(fp.read())
+    img.add_header('Content-Disposition', f'attachment; filename=MonteCarloSimulations')
+    fp.close()
+    msg.attach(img)
     part = MIMEText(htmlData, 'html')
 
     # Attach parts into message container
