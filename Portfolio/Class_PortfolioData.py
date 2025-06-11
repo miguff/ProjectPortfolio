@@ -45,7 +45,7 @@ class Portfolio():
         except Exception as e:
             warnings.warn(f"I could not upload, There was an error, please check: {e}")
 
-    def FillPortfolioValue(self, datatype: str, datedata: str, data: pd.DataFrame = None, ):
+    def FillPortfolioValue(self, datatype: str, datedata: str = None, data: pd.DataFrame = None, ):
         sqlString = f"INSERT INTO PortfolioValue ([LogDate], "
         match datatype:
             case "EoM":

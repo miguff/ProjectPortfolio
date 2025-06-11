@@ -22,36 +22,49 @@ from email.mime.image import MIMEImage
 
 
 def main():
-    date = datetime.now().replace(day=1).strftime('%Y-%m-%d')
-    current_date = datetime.now()
-    previous_month_date = current_date.replace(day=1) - timedelta(days=1)
-    Year = previous_month_date.strftime("%Y")
+    #date = datetime.now().replace(day=1).strftime('%Y-%m-%d')
 
-    typeofdata = "EoM"
+    StocksData = {
+        "BRK-B" :3,
+        "BLK": 2,
+        "KO":29,
+        "XOM": 10,
+        "FRT": 8,
+        "VUSA.AS": 46,
+        "IS0R.DE": 20,
+        "ZPRG.DE": 42
+    }
+
+    #Ezek majd kellenek ha megtudjuk rendesen csinálni a logint meg ilyenekt. 
+    # current_date = datetime.now()
+    # previous_month_date = current_date.replace(day=1) - timedelta(days=1)
+    # Year = previous_month_date.strftime("%Y")
+
+    # typeofdata = "EoM"
 
 
-    EmailDownloader = EmailDownload("subject:\"Havi értesítő\"", "Portfolio")
-    DownloadedPath = EmailDownloader.fileDownloader()
-    print(DownloadedPath)
+    # EmailDownloader = EmailDownload("subject:\"Havi értesítő\"", "Portfolio")
+    # DownloadedPath = EmailDownloader.fileDownloader()
+    # print(DownloadedPath)
 
-    if typeofdata == "EoM":
-        gathering = Data(DownloadedPath, f"Done - {Year} - Havi_ertesito.pdf")
-        gathering.inputfile()
-    elif typeofdata == "Mid-month":
-        gathering = Data(DownloadedPath, f"Done - {Year} - Havi_ertesito.pdf", f"Done - {Year} - Havi_ertesito.pdf")
+    # if typeofdata == "EoM":
+    #     gathering = Data(DownloadedPath, f"Done - {Year} - Havi_ertesito.pdf")
+    #     gathering.inputfile()
+    # elif typeofdata == "Mid-month":
+    #     gathering = Data(DownloadedPath, f"Done - {Year} - Havi_ertesito.pdf", f"Done - {Year} - Havi_ertesito.pdf")
     
-    gathering.DePassword()
-    dataDf = gathering.MonthlyExtract()
-    dataDf['Ticker'] = dataDf["ISIN"].apply(isin_to_ticker)
-    dataDf.reset_index(drop=True, inplace=True)
-    StocksData = dict(zip(dataDf["Ticker"], dataDf["Piece"]))
-    print(dataDf)
+    # gathering.DePassword()
+    # dataDf = gathering.MonthlyExtract()
+    # dataDf['Ticker'] = dataDf["ISIN"].apply(isin_to_ticker)
+    # dataDf.reset_index(drop=True, inplace=True)
+    # StocksData = dict(zip(dataDf["Ticker"], dataDf["Piece"]))
+    # print(dataDf)
 
-    # CreatePortfolioDB("Portfolio.db", StocksData)
+    CreatePortfolioDB("Portfolio.db", StocksData)
 
     newPortfolio = PD.Portfolio(StocksData, "Portfolio.db")
     newPortfolio.SetupPortfolio()
-    newPortfolio.FillSQL("PortfolioValue")
+    newPortfolio.FillPortfolioValue("Mid-month")
     newPortfolio.PortfoliValuefunc()
     newPortfolio.GetGrowthValue()
     htmlData = newPortfolio.HTMLData()
@@ -62,8 +75,7 @@ def main():
     startDate = endDate - dt.timedelta(days=300)
 
     meanReturns, covMatrix = get_data(stocklist, startDate, endDate)
-    print(meanReturns)
-    print(covMatrix)
+
 
 
     number_of_stocks = sum(StocksData.values())
