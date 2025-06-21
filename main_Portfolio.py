@@ -1,7 +1,7 @@
 from Portfolio import Class_PortfolioData as PD
-from DownloadData import DataGather as Data
-from DownloadData import isin_to_ticker
-from DownloadData import EmailDownload 
+# from DownloadData import DataGather as Data
+# from DownloadData import isin_to_ticker
+# from DownloadData import EmailDownload 
 from datetime import datetime, timedelta
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -13,7 +13,6 @@ import sys
 
 import pandas as pd
 import numpy as np
-from pandas_datareader import data as pdr
 import datetime as dt
 import yfinance as yf
 import matplotlib.pyplot as plt 
